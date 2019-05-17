@@ -7,6 +7,8 @@ import javax.xml.soap.*;
 import java.util.Iterator;
 
 public class Message {
+    //////////////////////////////// Source
+    //https://docs.oracle.com/cd/E19575-01/819-3669/bnbhs/index.html?fbclid=IwAR03vKvao_vocfrfVHyqprWXAmNZK9f2vugjciY8UUSmtfns-za2yWqqIvk
 
     private SOAPMessage soapMessage;
     private SOAPBody body;
@@ -84,7 +86,7 @@ public class Message {
 
     //////////////////////////////// Destination
 
-    public void setDestination(String destAddress) throws SOAPException {
+    public void setDestination(String destAddress) {
         Iterator iterator = header.getChildElements(headerName);
         SOAPHeaderElement information = (SOAPHeaderElement) iterator.next();
         Iterator childIterator = information.getChildElements(new QName("Addresses"));

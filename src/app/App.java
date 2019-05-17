@@ -84,7 +84,6 @@ public class App {
             consoleLog("1. - Send message");
             consoleLog("2. - Read message");
             consoleLog("3. - Show logs");
-            //consoleLog("4. - Połącz do serwera");
             consoleLog("0. - Exit");
             consoleLog("Choice:");
             choice = scaner.nextLine();
@@ -97,14 +96,6 @@ public class App {
                     break;
                 case "3":
                     showLogs();
-                    break;
-                case "4":
-//                    if(!connected){
-//                        startServer();
-//                        connected = true;
-//                        writeToConsole("Połączono");
-//                    }
-//                    writeToConsole("Aktualnie połączony");
                     break;
                 case "0":
                     System.exit(0);;

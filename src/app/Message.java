@@ -16,11 +16,11 @@ public class Message {
     private SOAPHeader header;
     private QName headerName;
 
-
-    Message(String sourceAddress) throws SOAPException {
+    Message() throws SOAPException {
         //stworzenie wiadomosci
         MessageFactory factory = MessageFactory.newInstance();
         this.soapMessage = factory.createMessage();
+        this.soapMessage = MessageFactory.newInstance().createMessage();
 
         /*
         I. A SOAPPart object that contains
@@ -33,93 +33,96 @@ public class Message {
         QName objects associated with SOAPBodyElement or SOAPHeaderElement objects
         must be fully qualified; that is, they must be created with
         a namespace URI, a local part, and a namespace prefix.
-         */
+        */
         //////////////////////////////// HEADER
 
-        header  = soapMessage.getSOAPHeader();
-        headerName = new QName("http://test.com", "Information", "h");
-        SOAPHeaderElement infromation = header.addHeaderElement(headerName);
+        headerName= new QName("http://soap-app.com", "Information", "h");
+        SOAPHeaderElement infromation = soapMessage.getSOAPHeader().addHeaderElement(headerName);
 
         QName childName = new QName("Addresses");
         SOAPElement addresses = infromation.addChildElement(childName);
 
+        childName = new QName("Source");
+        SOAPElement source = addresses.addChildElement(childName);
+        source.addTextNode("");
+
         childName = new QName("Destination");
         SOAPElement destination = addresses.addChildElement(childName);
-        destination.addTextNode("ALL");
+        destination.addTextNode("");
 
         //////////////////////////////// BODY
 
-        body = soapMessage.getSOAPBody();
-        bodyName = new QName("http://test.com", "Messages", "m");
-        SOAPBodyElement messages = body.addBodyElement(bodyName);
-
-        childName = new QName("Source");
-        SOAPElement source = messages.addChildElement(childName);
-        source.addTextNode(sourceAddress);
+        bodyName = new QName("http://soap-app.com", "Message", "m");
+        SOAPBodyElement messages = this.soapMessage.getSOAPBody().addBodyElement(bodyName);
 
         childName = new QName("Message");
         SOAPElement message = messages.addChildElement(childName);
         source.addTextNode("");
 
-        ////////////////////////////////
-
     }
-    //////////////////////////////// Source
 
+    //////////////////////////////// Message
+    public void setMessage(String message) throws SOAPException {
+        SOAPBody soapBody = this.soapMessage.getSOAPBody();
+
+        Iterator bodyIt = soapBody.getChildElements(bodyName);
+        SOAPBodyElement messeges = (SOAPBodyElement) bodyIt.next();
+
+        Iterator bodyElementIt = messeges.getChildElements(new QName("Message"));
+        SOAPElement element = (SOAPElement) bodyElementIt.next();
+
+        element.addTextNode(message);
+    }
+
+    public String getMessage() throws SOAPException {
+        SOAPBody soapBody = this.soapMessage.getSOAPBody();
+
+        Iterator bodyIt = soapBody.getChildElements(bodyName);
+        SOAPBodyElement messeges = (SOAPBodyElement) bodyIt.next();
+
+        Iterator childElementIt = messeges.getChildElements(new QName("Message"));
+        SOAPElement element = (SOAPElement) childElementIt.next();
+
+        return element.getTextContent();
+    }
+
+    public SOAPElement getSOAPHeaderElement () throws SOAPException {
+
+        SOAPHeader soapHeader = this.soapMessage.getSOAPHeader();
+        Iterator headerIterator = soapHeader.getChildElements(headerName);
+        SOAPHeaderElement information = (SOAPHeaderElement) headerIterator.next();
+
+        Iterator childElementIt = information.getChildElements((new QName("Addresses")));
+
+        return (SOAPElement) childElementIt.next();
+    }
+
+    //////////////////////////////// Source
     public void setSource(String sourceAddress) throws SOAPException {
-        Iterator iterator = header.getChildElements(headerName);
-        SOAPHeaderElement information = (SOAPHeaderElement) iterator.next();
-        Iterator childIterator = information.getChildElements((new QName("Addresses")));
-        SOAPElement element = (SOAPElement) childIterator.next();
+
+        SOAPElement element = getSOAPHeaderElement();
         NodeList nodes = element.getChildNodes();
         nodes.item(0).setTextContent(sourceAddress);
     }
 
     public String getSource() throws SOAPException {
-        Iterator iterator = header.getChildElements(headerName);
-        SOAPHeaderElement information = (SOAPHeaderElement) iterator.next();
-        Iterator childElementIt = information.getChildElements((new QName("Addresses")));
-        SOAPElement element = (SOAPElement) childElementIt.next();
+
+        SOAPElement element = getSOAPHeaderElement();
         NodeList nodes = element.getChildNodes();
         return nodes.item(0).getTextContent();
     }
 
     //////////////////////////////// Destination
-
-    public void setDestination(String destAddress) {
-        Iterator iterator = header.getChildElements(headerName);
-        SOAPHeaderElement information = (SOAPHeaderElement) iterator.next();
-        Iterator childIterator = information.getChildElements(new QName("Addresses"));
-        SOAPElement element = (SOAPElement) childIterator.next();
+    public void setDestination(String destAddress) throws SOAPException {
+        SOAPElement element = getSOAPHeaderElement();
         NodeList nodes = element.getChildNodes();
         nodes.item(1).setTextContent(destAddress);
     }
 
     public String getDestination() throws SOAPException {
-        Iterator iterator = header.getChildElements(headerName);
-        SOAPHeaderElement information = (SOAPHeaderElement) iterator.next();
-        Iterator childIterator = information.getChildElements(new QName("Addresses"));
-        SOAPElement element = (SOAPElement) childIterator.next();
+        SOAPElement element = getSOAPHeaderElement();
         NodeList nodes = element.getChildNodes();
         return nodes.item(1).getTextContent();
-    }
-
-    //////////////////////////////// Message
-
-    public void setMessage(String message) throws SOAPException {
-        Iterator iterator = body.getChildElements(bodyName);
-        SOAPBodyElement bodyElement = (SOAPBodyElement)iterator.next();
-        Iterator childIterator = bodyElement.getChildElements(new QName("Message"));
-        SOAPElement element = (SOAPElement) childIterator.next();
-        element.addTextNode(message);
-    }
-
-    public String getMessage() {
-        Iterator iterator = body.getChildElements(bodyName);
-        SOAPBodyElement bodyElement = (SOAPBodyElement)iterator.next();
-        Iterator childIterator = bodyElement.getChildElements(new QName("Message"));
-        SOAPElement element = (SOAPElement) childIterator.next();
-        return element.getTextContent();
     }
 
     public SOAPMessage getSoapMessage() {

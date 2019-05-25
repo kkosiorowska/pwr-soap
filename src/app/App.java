@@ -11,10 +11,12 @@ public class App {
     Server server;
     Thread serverThread;
 
-    public App(String address, int port, String nextAddress, int nextPort) {
+    public App(String address, int port, String nextAddress, int nextPort) throws IOException {
 
         this.address = address + ":" + port;
         this.nextAddress = nextAddress+ ":" + nextPort;
+
+        server = new Server(address, port, nextAddress, nextPort);
     }
 
     public void creatMessage() throws IOException, SOAPException {
@@ -23,10 +25,11 @@ public class App {
         String message = null;
         String destination = null;
         String port;
+        String name;
 
         consoleLog("-------------------Send message-------------------");
         consoleLog("1. - Unicast");
-        consoleLog("2. - Breadcast");
+        consoleLog("2. - Broadcast");
         consoleLog("Choice:");
         choice = scaner.nextLine();
 
@@ -35,32 +38,44 @@ public class App {
                 consoleLog("Unicast");
                 consoleLog("Message: ");
                 message = scaner.nextLine();
-                consoleLog("Send to: ");
+                consoleLog("Send to : ");
+                name = scaner.nextLine();
+                consoleLog("Port : ");
                 port = scaner.nextLine();
-                destination = "localhost:"+port;
+                destination = name + ":" + port;
+                consoleLog("Send to " + destination);
                 break;
             case "2":
                 consoleLog("Breadcast");
                 consoleLog("Message: ");
                 message = scaner.nextLine();
                 destination = "All";
+                consoleLog("Send to " + destination);
                 break;
             default:
                 consoleLog("Error!");
         }
 
-        Message mewMessage = new Message(address);
+        Message mewMessage = new Message();
+        mewMessage.setSource(address);
         mewMessage.setDestination(destination);
         mewMessage.setMessage(message);
-        Server.sendMessage(mewMessage);
+        server.sendMessage(mewMessage);
     }
 
     public void readMessages() throws SOAPException {
-        consoleLog("-------------------Read mesages-------------------");
-        for (int i = 0; i < server.getMassagesBox().size(); i++) {
-            consoleLog(i + ". From: " + server.getMassagesBox().get(i).getSource());
-            consoleLog("Message: " + server.getMassagesBox().get(i).getMessage());
-        }
+            consoleLog("-------------------Read mesages-------------------");
+
+            if(server.getMassagesBox().size()==0) consoleLog("No message.");
+            else{
+                for (int i = 1; i < server.getMassagesBox().size()+1; i++) {
+                    consoleLog(i + ". From: " + server.getMassagesBox().get(i-1).getSource());
+                    consoleLog("Text: " + server.getMassagesBox().get(i-1).getMessage());
+                }
+            }
+            Scanner scaner = new Scanner(System.in);
+            consoleLog("");
+            scaner.nextLine();
     }
 
     public void showLogs(){
@@ -69,10 +84,8 @@ public class App {
     }
 
     public void menu() throws IOException, SOAPException {
-
         serverThread = new Thread(server);
         serverThread.start();
-
 
         Scanner scaner = new Scanner(System.in);
         String choice;
@@ -103,7 +116,6 @@ public class App {
                     consoleLog("Error!");
             }
         }
-
     }
 
     private void consoleLog(String string) {

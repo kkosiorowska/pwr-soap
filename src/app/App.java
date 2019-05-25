@@ -46,7 +46,7 @@ public class App {
                 consoleLog("Send to " + destination);
                 break;
             case "2":
-                consoleLog("Breadcast");
+                consoleLog("Broadcast");
                 consoleLog("Message: ");
                 message = scaner.nextLine();
                 destination = "All";
